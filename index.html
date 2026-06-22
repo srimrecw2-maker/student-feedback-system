@@ -1,0 +1,418 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Hourly Feedback System</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    padding:20px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    background:#fff;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+    color:#003366;
+    margin-bottom:20px;
+}
+
+.progress{
+    text-align:center;
+    font-weight:bold;
+    margin-bottom:20px;
+    color:#003366;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+label{
+    font-weight:bold;
+    display:block;
+    margin-bottom:5px;
+}
+
+select, textarea, input[type="date"]{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+textarea{
+    height:100px;
+    resize:vertical;
+}
+
+.hour{
+    display:none;
+}
+
+.hour.active{
+    display:block;
+}
+
+.radio-group label{
+    display:inline-block;
+    margin-right:20px;
+    font-weight:normal;
+}
+
+.buttons{
+    margin-top:20px;
+    display:flex;
+    justify-content:space-between;
+}
+
+button{
+    border:none;
+    padding:12px 25px;
+    border-radius:5px;
+    cursor:pointer;
+    color:white;
+    font-size:15px;
+}
+
+.prev{
+    background:#6c757d;
+}
+
+.next{
+    background:#007bff;
+}
+
+.submit{
+    background:#28a745;
+}
+
+.header-box{
+    background:#eef4ff;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Student Hourly Feedback System</h1>
+
+<div class="header-box">
+
+<div class="form-group">
+<label>Date</label>
+<input type="date" id="feedbackDate">
+</div>
+
+<div class="form-group">
+<label>Section *</label>
+<select id="section">
+<option value="">Select Section</option>
+<option>III B.Tech ECE-A</option>
+<option>III B.Tech ECE-B</option>
+<option>III B.Tech ECE-C</option>
+<option>IV B.Tech ECE-A</option>
+<option>IV B.Tech ECE-B</option>
+<option>IV B.Tech ECE-C</option>
+</select>
+</div>
+
+</div>
+
+<div class="progress" id="progress">Hour 1 of 6</div>
+
+<div id="hoursContainer"></div>
+
+</div>
+
+<script>
+
+document.getElementById("feedbackDate").value =
+new Date().toISOString().split('T')[0];
+
+const subjects = [
+"CVTT",
+"AC",
+"NAS",
+"DLD",
+"SS",
+"IC",
+"AC LAB",
+"DLD LAB",
+"BS LAB",
+"Technical Seminar",
+"Activity Hour"
+];
+
+const hoursContainer = document.getElementById("hoursContainer");
+
+for(let i=1;i<=6;i++){
+
+let subjectOptions = '<option value="">Select Subject</option>';
+
+subjects.forEach(sub=>{
+subjectOptions += `<option>${sub}</option>`;
+});
+
+hoursContainer.innerHTML += `
+<div class="hour ${i===1?'active':''}" id="hour${i}">
+
+<h2>Hour ${i}</h2>
+
+<div class="form-group">
+<label>Subject *</label>
+<select class="subject">
+${subjectOptions}
+</select>
+</div>
+
+<div class="form-group">
+<label>Revision Conducted? *</label>
+<div class="radio-group">
+<label><input type="radio" name="revision${i}" value="Yes"> Yes</label>
+<label><input type="radio" name="revision${i}" value="No"> No</label>
+</div>
+</div>
+
+<div class="form-group">
+<label>Topic Relevant? *</label>
+<div class="radio-group">
+<label><input type="radio" name="relevant${i}" value="Yes"> Yes</label>
+<label><input type="radio" name="relevant${i}" value="No"> No</label>
+</div>
+</div>
+
+<div class="form-group">
+<label>Topic Conclusion? *</label>
+<div class="radio-group">
+<label><input type="radio" name="conclusion${i}" value="Yes"> Yes</label>
+<label><input type="radio" name="conclusion${i}" value="No"> No</label>
+</div>
+</div>
+
+<div class="form-group">
+<label>Task Given? *</label>
+<div class="radio-group">
+<label><input type="radio" name="task${i}" value="Yes"> Yes</label>
+<label><input type="radio" name="task${i}" value="No"> No</label>
+</div>
+</div>
+
+<div class="form-group">
+<label>Overall Feedback *</label>
+<select class="overall">
+<option value="">Select Feedback</option>
+<option>Excellent</option>
+<option>Good</option>
+<option>Average</option>
+<option>Poor</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Topics Covered *</label>
+<textarea class="topics"></textarea>
+</div>
+
+<div class="buttons">
+
+${i>1 ?
+'<button type="button" class="prev" onclick="prevHour()">Previous</button>'
+:
+'<div></div>'}
+
+${i<6 ?
+'<button type="button" class="next" onclick="nextHour()">Next</button>'
+:
+'<button type="button" class="submit" onclick="submitFeedback()">Submit</button>'}
+
+</div>
+
+</div>
+`;
+}
+
+let currentHour = 1;
+
+function validateHour(hourNo){
+
+const hourDiv = document.getElementById("hour"+hourNo);
+
+const subject =
+hourDiv.querySelector(".subject").value;
+
+if(subject===""){
+alert("Please select Subject.");
+return false;
+}
+
+const revision =
+hourDiv.querySelector(`input[name="revision${hourNo}"]:checked`);
+
+if(!revision){
+alert("Please answer Revision Conducted.");
+return false;
+}
+
+const relevant =
+hourDiv.querySelector(`input[name="relevant${hourNo}"]:checked`);
+
+if(!relevant){
+alert("Please answer Topic Relevant.");
+return false;
+}
+
+const conclusion =
+hourDiv.querySelector(`input[name="conclusion${hourNo}"]:checked`);
+
+if(!conclusion){
+alert("Please answer Topic Conclusion.");
+return false;
+}
+
+const task =
+hourDiv.querySelector(`input[name="task${hourNo}"]:checked`);
+
+if(!task){
+alert("Please answer Task Given.");
+return false;
+}
+
+const overall =
+hourDiv.querySelector(".overall").value;
+
+if(overall===""){
+alert("Please select Overall Feedback.");
+return false;
+}
+
+const topics =
+hourDiv.querySelector(".topics").value.trim();
+
+if(topics===""){
+alert("Please enter Topics Covered.");
+return false;
+}
+
+return true;
+}
+
+function showHour(hourNo){
+
+document.querySelectorAll(".hour")
+.forEach(h=>h.classList.remove("active"));
+
+document.getElementById("hour"+hourNo)
+.classList.add("active");
+
+document.getElementById("progress")
+.innerHTML = "Hour " + hourNo + " of 6";
+
+window.scrollTo(0,0);
+}
+
+function nextHour(){
+
+if(!validateHour(currentHour))
+return;
+
+currentHour++;
+
+showHour(currentHour);
+}
+
+function prevHour(){
+
+currentHour--;
+
+showHour(currentHour);
+}
+
+function submitFeedback(){
+
+if(document.getElementById("section").value===""){
+alert("Please select Section.");
+return;
+}
+
+if(!validateHour(6))
+return;
+
+const feedbackData = {
+
+date: document.getElementById("feedbackDate").value,
+
+section: document.getElementById("section").value,
+
+hours:[]
+};
+
+for(let i=1;i<=6;i++){
+
+let hourDiv =
+document.getElementById("hour"+i);
+
+feedbackData.hours.push({
+
+hour:i,
+
+subject:
+hourDiv.querySelector(".subject").value,
+
+revision:
+hourDiv.querySelector(`input[name="revision${i}"]:checked`).value,
+
+relevant:
+hourDiv.querySelector(`input[name="relevant${i}"]:checked`).value,
+
+conclusion:
+hourDiv.querySelector(`input[name="conclusion${i}"]:checked`).value,
+
+task:
+hourDiv.querySelector(`input[name="task${i}"]:checked`).value,
+
+overall:
+hourDiv.querySelector(".overall").value,
+
+topics:
+hourDiv.querySelector(".topics").value
+
+});
+}
+
+console.log(feedbackData);
+
+alert("Feedback Submitted Successfully!");
+
+/*
+Google Sheets Integration
+will be added here later
+*/
+}
+</script>
+
+</body>
+</html>
+```
