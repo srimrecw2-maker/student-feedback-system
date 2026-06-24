@@ -402,10 +402,34 @@ console.log(feedbackData);
 
 alert("Feedback Submitted Successfully!");
 
-/*
-Google Sheets Integration
-will be added here later
-*/
+```javascript
+fetch("https://script.google.com/macros/s/AKfycbzl2WB0XvYUske-ZBV9rSQqSjb3yy8bgBKXu7IRFxvCxUSHVW7igEJsgJ4XQvZMrsUCyA/exec",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(feedbackData)
+
+})
+.then(response=>response.text())
+.then(result=>{
+
+alert("Feedback Submitted Successfully!");
+
+location.reload();
+
+})
+.catch(error=>{
+
+alert("Error Saving Feedback");
+
+console.log(error);
+
+});
+```
 }
 </script>
 
