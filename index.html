@@ -130,8 +130,12 @@ button{
 <label>Section *</label>
 <select id="section">
 <option value="">Select Section</option>
-<option>II B.Tech ECE-A</option>
-<option>II B.Tech ECE-B</option>
+<option>III B.Tech ECE-A</option>
+<option>III B.Tech ECE-B</option>
+<option>III B.Tech ECE-C</option>
+<option>IV B.Tech ECE-A</option>
+<option>IV B.Tech ECE-B</option>
+<option>IV B.Tech ECE-C</option>
 </select>
 </div>
 
@@ -400,37 +404,34 @@ hourDiv.querySelector(".topics").value
 
 console.log(feedbackData);
 
-alert("Feedback Submitted Successfully!");
+fetch("https://script.google.com/macros/s/AKfycbxqOEFZYeubTIpk9a2cjlztlwSNkVsn7Bo9BHVl845mYP0lyxw7uK89Acn5fLB3QrbLuQ/exec", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(feedbackData)
+})
+.then(response => response.text())
+.then(result => {
 
-```javascript
-fetch("https://script.google.com/macros/s/AKfycbxqOEFZYeubTIpk9a2cjlztlwSNkVsn7Bo9BHVl845mYP0lyxw7uK89Acn5fLB3QrbLuQ/exec",{
+    console.log("Server Response:", result);
 
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify(feedbackData)
+    if(result.includes("Success")){
+        alert("Feedback Submitted Successfully!");
+        location.reload();
+    }
+    else{
+        alert("Server Response: " + result);
+    }
 
 })
-.then(response=>response.text())
-.then(result=>{
+.catch(error => {
 
-alert("Feedback Submitted Successfully!");
+    console.error(error);
 
-location.reload();
+    alert("Error Saving Feedback. Check browser console (F12).");
 
-})
-.catch(error=>{
-
-alert("Error Saving Feedback");
-
-console.log(error);
-
-});
-```
-}
+});}
 </script>
 
 </body>
